@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QR Pro | Premium Generator</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #6366f1; /* Indigo moderno */
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899; /* Pink accent */
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --radius: 16px;
+            --anim-speed: 0.3s;
+        }
+
+        /* RESET & BASE */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f3f4f6;
+            background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text-main);
+        }
+
+        /* CARD PRINCIPAL CON EFECTO GLASS */
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* HEADER */
+        .header {
+            padding: 30px 30px 20px;
+            text-align: center;
+        }
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 14px;
+            color: white;
+            font-size: 24px;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+            transform: rotate(-5deg);
+            transition: transform 0.3s;
+        }
+        .header:hover .brand-badge { transform: rotate(0deg) scale(1.1); }
+        
+        h1 { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.5px; margin-bottom: 5px; }
+        .subtitle { color: var(--text-sub); font-size: 14px; }
+
+        /* TABS (Responsive Grid) */
+        .tabs-wrapper {
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+        .tabs {
+            display: flex;
+            background: #f1f5f9;
+            padding: 5px;
+            border-radius: 14px;
+            gap: 5px;
+        }
+        .tab-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sub);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .tab-btn i { font-size: 16px; margin-bottom: 2px; }
+        .tab-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transform: scale(1.02);
+        }
+
+        /* CONTENT AREA */
+        .content-body { padding: 0 30px 40px; }
+        
+        .input-group { display: none; animation: fadeIn 0.4s ease; }
+        .input-group.active { display: block; }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            margin-top: 20px;
+        }
+
+        /* INPUTS MODERNOS */
+        input, textarea {
+            width: 100%;
+            padding: 14px 16px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 15px;
+            color: var(--text-main);
+            transition: all 0.2s;
+            outline: none;
+        }
+        input:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        /* DRAG & DROP ZONE */
+        .drop-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+        .drop-zone:hover {
+            border-color: var(--primary);
+            background: #eef2ff;
+            transform: translateY(-2px);
+        }
+        .drop-icon {
+            font-size: 32px;
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: block;
+        }
+        .drop-text { font-size: 14px; font-weight: 500; color: var(--text-main); }
+        .drop-sub { font-size: 11px; color: var(--text-sub); margin-top: 5px; }
+        
+        /* ACTION BUTTON */
+        .btn-generate {
+            width: 100%;
+            margin-top: 25px;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 15px 25px -5px rgba(79, 70, 229, 0.5); }
+        .btn-generate:active { transform: translateY(0); }
+        .btn-generate:disabled { background: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* QR DISPLAY */
+        .qr-wrapper {
+            margin-top: 30px;
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid var(--border);
+            display: none; /* Oculto inicialmente */
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .qr-wrapper.show { display: block; }
+        #qrcode img { margin: 0 auto; border-radius: 8px; }
+
+        /* TOAST NOTIFICATION (Custom Alert) */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #1e293b;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 90%;
+            max-width: 400px;
+        }
+        .toast.active { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.error { background: #ef4444; }
+        .toast.success { background: #10b981; }
+
+        /* LOADER */
+        .spinner {
+            width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%; border-top-color: white;
+            animation: spin 1s ease-in-out infinite; display: inline-block; margin-right: 10px;
+        }
+
+        /* ANIMATIONS */
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* RESPONSIVE MOBILE TWEAKS */
+        @media (max-width: 480px) {
+            body { padding: 10px; background: #f1f5f9; } /* Fondo plano en móvil para rendimiento */
+            .app-container { box-shadow: none; border-radius: 0; height: 100vh; max-height: none; border-radius: 20px; }
+            .header { padding: 20px; }
+            .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } /* Grid en móvil */
+            .tab-btn { flex-direction: row; justify-content: center; height: 44px; } /* Botones más altos para tocar */
+            h1 { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="toast" class="toast">
+    <i class="fas fa-info-circle"></i>
+    <span id="toast-msg">Mensaje del sistema</span>
+</div>
+
+<div class="app-container">
+    <div class="header">
+        <div class="brand-badge"><i class="fas fa-qrcode"></i></div>
+        <h1>QR Generator Pro</h1>
+        <p class="subtitle">Diseño premium. Funcionalidad total.</p>
+    </div>
+
+    <div class="tabs-wrapper">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="setTab(event, 'url')"><i class="fas fa-link"></i> URL</button>
+            <button class="tab-btn" onclick="setTab(event, 'upload')"><i class="fas fa-cloud-upload-alt"></i> Archivo</button>
+            <button class="tab-btn" onclick="setTab(event, 'text')"><i class="fas fa-font"></i> Texto</button>
+            <button class="tab-btn" onclick="setTab(event, 'contact')"><i class="fas fa-user-circle"></i> VCard</button>
+        </div>
+    </div>
+
+    <div class="content-body">
+        
+        <div id="url-section" class="input-group active">
+            <label>Enlace Web</label>
+            <input type="url" id="inp-url" placeholder="https://youtube.com/..." autocomplete="off">
+        </div>
+
+        <div id="upload-section" class="input-group">
+            <label>Subida Segura de Archivo</label>
+            <div class="drop-zone" onclick="document.getElementById('file-inp').click()">
+                <i class="fas fa-cloud-arrow-up drop-icon"></i>
+                <span class="drop-text">Toca para seleccionar</span>
+                <p class="drop-sub" id="file-name">Soporta Imágenes (JPG, PNG) y Video pequeño</p>
+                <input type="file" id="file-inp" hidden onchange="updateFileName(this)">
+            </div>
+            <p style="font-size:11px; color:#ef4444; margin-top:10px; line-height:1.4;">
+                <i class="fas fa-lock"></i> <strong>Nota Técnica:</strong> La subida requiere servidor (Live Server/Hosting) para evitar bloqueos CORS.
+            </p>
+        </div>
+
+        <div id="text-section" class="input-group">
+            <label>Mensaje de Texto</label>
+            <textarea id="inp-text" rows="3" placeholder="Escribe tu mensaje secreto..."></textarea>
+        </div>
+
+        <div id="contact-section" class="input-group">
+            <label>Nombre Completo</label>
+            <input type="text" id="c-name" placeholder="Ej. Ana García">
+            <label>Teléfono Móvil</label>
+            <input type="tel" id="c-phone" placeholder="+52 555...">
+            <label>Correo Electrónico</label>
+            <input type="email" id="c-email" placeholder="ana@empresa.com">
+        </div>
+
+        <button class="btn-generate" id="btn-gen" onclick="generate()">
+            <span id="btn-text">Generar Código QR</span>
+        </button>
+
+        <div class="qr-wrapper" id="qr-result">
+            <div id="qrcode"></div>
+            <p style="margin-top:15px; font-size:13px; color:var(--text-sub);" id="link-result"></p>
+            <button onclick="resetApp()" style="background:none; border:none; color:var(--text-sub); margin-top:15px; cursor:pointer; font-size:12px; text-decoration:underline;">
+                Crear Nuevo
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Configuración Global
+    const QR_COLOR = "#4f46e5"; // Indigo
+    let currentTab = 'url';
+    
+    // --- Lógica de UI ---
+    function setTab(e, tabId) {
+        currentTab = tabId;
+        
+        // Update Tabs
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        
+        // Update Content
+        document.querySelectorAll('.input-group').forEach(p => p.classList.remove('active'));
+        document.getElementById(tabId + '-section').classList.add('active');
+        
+        // Hide Result
+        document.getElementById('qr-result').classList.remove('show');
+    }
+
+    function updateFileName(input) {
+        if(input.files && input.files[0]) {
+            document.getElementById('file-name').innerHTML = `<strong>${input.files[0].name}</strong>`;
+            document.getElementById('file-name').style.color = "var(--primary)";
+        }
+    }
+
+    function showToast(msg, type = 'info') {
+        const toast = document.getElementById('toast');
+        const txt = document.getElementById('toast-msg');
+        
+        toast.className = `toast ${type} active`;
+        txt.innerText = msg;
+        
+        // Icon logic
+        const icon = toast.querySelector('i');
+        icon.className = type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
+
+        setTimeout(() => {
+            toast.classList.remove('active');
+        }, 3500);
+    }
+
+    // --- Lógica Principal ---
+    async function generate() {
+        const btn = document.getElementById('btn-gen');
+        const btnTxt = document.getElementById('btn-text');
+        
+        let finalData = "";
+
+        // 1. Validar Datos
+        if(currentTab === 'url') {
+            finalData = document.getElementById('inp-url').value;
+            if(!finalData) return showToast("Por favor ingresa una URL válida", "error");
+        }
+        else if(currentTab === 'text') {
+            finalData = document.getElementById('inp-text').value;
+            if(!finalData) return showToast("El campo de texto está vacío", "error");
+        }
+        else if(currentTab === 'contact') {
+            const n = document.getElementById('c-name').value;
+            const p = document.getElementById('c-phone').value;
+            if(!n) return showToast("El nombre es obligatorio", "error");
+            finalData = `BEGIN:VCARD\nVERSION:3.0\nFN:${n}\nTEL:${p}\nEND:VCARD`;
+        }
+        else if(currentTab === 'upload') {
+            const fileInput = document.getElementById('file-inp');
+            if(!fileInput.files.length) return showToast("Selecciona un archivo primero", "error");
+            
+            // Start Upload Animation
+            btn.disabled = true;
+            btnTxt.innerHTML = `<div class="spinner"></div> Subiendo (file.io)...`;
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+
+                const res = await fetch('https://file.io/?expires=1w', { method: 'POST', body: formData });
+                
+                if(!res.ok) throw new Error("Fallo en el servidor");
+                const json = await res.json();
+                
+                if(json.success) {
+                    finalData = json.link;
+                    showToast("¡Archivo subido correctamente!", "success");
+                } else {
+                    throw new Error("Error en la respuesta del servidor");
+                }
+            } catch(err) {
+                console.error(err);
+                showToast("Error de conexión (CORS). Usa Live Server.", "error");
+                btn.disabled = false;
+                btnTxt.innerText = "Reintentar";
+                return;
+            }
+        }
+
+        // 2. Generar QR
+        if(finalData) {
+            btn.disabled = true;
+            btnTxt.innerHTML = `<div class="spinner"></div> Generando...`;
+            
+            // Fake delay for UX (feels more pro)
+            setTimeout(() => {
+                createQR(finalData);
+                btn.disabled = false;
+                btnTxt.innerText = "Generar Código QR";
+            }, 600);
+        }
+    }
+
+    function createQR(text) {
+        const container = document.getElementById('qrcode');
+        container.innerHTML = '';
+        
+        new QRCode(container, {
+            text: text,
+            width: 180,
+            height: 180,
+            colorDark : QR_COLOR,
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.M
+        });
+
+        const resBox = document.getElementById('qr-result');
+        resBox.classList.add('show');
+        
+        // Smooth scroll to result
+        resBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        
+        // Show link if it's URL/Upload
+        const linkDisplay = document.getElementById('link-result');
+        if(currentTab === 'url' || currentTab === 'upload') {
+            linkDisplay.innerHTML = `<a href="${text}" target="_blank" style="color:var(--primary)">Abrir Enlace Generado <i class="fas fa-external-link-alt"></i></a>`;
+        } else {
+            linkDisplay.innerText = "¡Escanea para ver el contenido!";
+        }
+    }
+
+    function resetApp() {
+        document.getElementById('qr-result').classList.remove('show');
+        document.querySelectorAll('input, textarea').forEach(i => i.value = '');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
